@@ -88,8 +88,9 @@ class Grid():
             List of swaps, each swap being a tuple of two cells (each cell being a tuple of integers). 
             So the format should be [((i1, j1), (i2, j2)), ((i1', j1'), (i2', j2')), ...].
         """
-        # TODO: implement this function (and remove the line "raise NotImplementedError").
-        raise NotImplementedError
+        for cell_pair in cell_pair_list:
+            (cell1,cell2)=cell_pair
+            self.swap(cell1,cell2)
 
     @classmethod
     def grid_from_file(cls, file_name): 
