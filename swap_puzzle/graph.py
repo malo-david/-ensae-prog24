@@ -1,6 +1,9 @@
 """
 This is the graph module. It contains a minimalistic Graph class.
 """
+from collections import deque
+import networkx as nx
+import matplotlib.pyplot as plt
 
 class Graph:
     """
@@ -81,7 +84,7 @@ class Graph:
         self.nb_edges += 1
         self.edges.append((node1, node2))
 
-    def bfs(self, src, dst): 
+    def bfs2(self, src, dst): 
         """
         Finds a shortest path from src to dst by BFS.  
 
@@ -97,8 +100,52 @@ class Graph:
         path: list[NodeType] | None
             The shortest path from src to dst. Returns None if dst is not reachable from src
         """ 
-        # TODO: implement this function (and remove the line "raise NotImplementedError").
-        raise NotImplementedError
+        # This code was written from pseudo-codes found on the links proposed by the TP
+        visited = set() # Initialize a set to keep track of visited nodes. At first we used a list but it didn't work, thus we tried with a set and it was much more pratcical.
+        queue = deque([(src, [src])]) # Initialize a deque for BFS queue, starting with the source node and its path : useful since it supports fast operations such as adding or removing elements from both ends of the queue
+        while queue: # Iterate until the queue is empty
+            node, path = queue.popleft() # Pop the first element (node, path) from the queue
+            # If the destination node is reached, return the path
+            if node == dst:
+                return path
+            if node not in visited: # If the node has not been visited yet
+                visited.add(node) # Mark the node as visited
+                for neighbor in self.graph[node]:# Iterate through the neighbors of the current node
+                    queue.append((neighbor, path + [neighbor])) # Append the neighbor to the path and add it to the queue
+        return None # If the destination node is not reachable, return None
+
+    def test_bfs2():
+        graph = Graph({1: [2, 3], 2: [3, 4], 3: [4], 4: [3]})
+        src = 1
+        dst = 4
+        expected_path = [1, 3, 4]
+        assert graph.bfs2(src, dst) == expected_path
+
+    def bfs2_quest8(self, src, dst): 
+        visited = set()
+        queue = deque([(src, [src])])
+        while queue: 
+            node, path = queue.popleft()
+            if node == dst:
+                return path
+            if node not in visited: 
+                visited.add(node) 
+                for neighbor in self.graph[node]:
+                    if neighbor not in visited and neighbor != src: # we don't visit the node src which can improve the algorithm
+                        queue.append((neighbor, path + [neighbor]))
+        return None
+
+    def plot_graph(self, filename):
+        G = nx.Graph()
+        G.add_nodes_from(self.nodes) # Ajouter les nœuds au graphe
+        G.add_edges_from(self.edges) # Ajouter les arêtes au graphe
+        # Dessiner le graphe
+        pos = nx.spring_layout(G)  # Layout du graphe
+        nx.draw(G, pos, with_labels=True, node_color='skyblue', node_size=700, edge_color='gray', linewidths=1, font_size=12)
+        # Afficher le graphe
+        plt.title("Graph Representation")
+        plt.savefig(filename)
+        plt.close()
 
     @classmethod
     def graph_from_file(cls, file_name):
@@ -132,3 +179,8 @@ class Graph:
                     raise Exception("Format incorrect")
         return graph
 
+
+#Tests
+g2 = Graph.graph_from_file("input/graph1.in")
+
+"""g2.plot_graph("graph.png")"""
